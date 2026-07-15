@@ -127,7 +127,42 @@ if ($path === '/api/game') {
     $downloads->execute([$game['id']]);
     $extras = $pdo->prepare('SELECT name, size FROM game_extras WHERE game_id = ? ORDER BY name');
     $extras->execute([$game['id']]);
-    echo json_encode(['game' => $game, 'downloads' => $downloads->fetchAll(PDO::FETCH_ASSOC), 'extras' => $extras->fetchAll(PDO::FETCH_ASSOC)], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $localFiles = [];
+    $downloadRoot = $_ENV['DOWNLOAD_DIRECTORY'] ?? getcwd();
+    $gameFolder = $downloadRoot . DIRECTORY_SEPARATOR . ($game['slug'] ?: preg_replace('/[^a-z0-9]+/i', '-', strtolower($game['title'])));
+    if (is_dir($gameFolder)) {
+        try {
+            $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($gameFolder, FilesystemIterator::SKIP_DOTS));
+            foreach ($files as $file) {
+                if ($file->isFile()) {
+                    $relative = str_replace('\\', '/', substr($file->getPathname(), strlen($downloadRoot) + 1));
+                    $localFiles[] = ['name' => $file->getFilename(), 'path' => $relative, 'size' => $file->getSize()];
+                }
+            }
+        } catch (UnexpectedValueException) {
+        }
+    }
+    echo json_encode(['game' => $game, 'downloads' => $downloads->fetchAll(PDO::FETCH_ASSOC), 'extras' => $extras->fetchAll(PDO::FETCH_ASSOC), 'local_files' => $localFiles], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    return;
+}
+
+if ($path === '/api/export') {
+    $relative = $_GET['path'] ?? '';
+    $downloadRoot = realpath($_ENV['DOWNLOAD_DIRECTORY'] ?? getcwd());
+    if (!is_string($relative) || $relative === '' || $downloadRoot === false) {
+        http_response_code(400);
+        return;
+    }
+    $target = realpath($downloadRoot . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $relative));
+    if ($target === false || !is_file($target) || !str_starts_with($target, $downloadRoot . DIRECTORY_SEPARATOR)) {
+        http_response_code(404);
+        return;
+    }
+    header('Content-Type: application/octet-stream');
+    header('Content-Length: ' . filesize($target));
+    header('Content-Disposition: attachment; filename="' . addcslashes(basename($target), '"\\') . '"');
+    header('X-Content-Type-Options: nosniff');
+    readfile($target);
     return;
 }
 
@@ -177,6 +212,40 @@ if ($path === '/api/artwork') {
     return;
 }
 
+if ($path === '/api/history') {
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['activeJob' => getActiveJob($root), 'history' => readHistory($root)], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    return;
+}
+
+if ($path === '/api/storage') {
+    header('Content-Type: application/json; charset=utf-8');
+    $downloadRoot = $_ENV['DOWNLOAD_DIRECTORY'] ?? getcwd();
+    $used = 0;
+    $files = 0;
+    if (is_dir($downloadRoot)) {
+        try {
+            $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($downloadRoot, FilesystemIterator::SKIP_DOTS));
+            foreach ($iterator as $item) {
+                if ($item->isFile()) {
+                    $used += $item->getSize();
+                    ++$files;
+                }
+            }
+        } catch (UnexpectedValueException) {
+            // A temporarily inaccessible folder should not hide the rest of the dashboard.
+        }
+    }
+    $expected = 0;
+    $database = ($_ENV['CONFIG_DIRECTORY'] ?? $root) . '/gog-downloader.db';
+    if (is_file($database)) {
+        $pdo = new PDO('sqlite:' . $database);
+        $expected = (int) ($pdo->query('SELECT COALESCE(SUM(size), 0) FROM downloads')->fetchColumn() ?: 0);
+    }
+    echo json_encode(['path' => $downloadRoot, 'used' => $used, 'expected' => $expected, 'files' => $files], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    return;
+}
+
 if ($path === '/api/run' && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     runCommand($root);
     return;
@@ -212,9 +281,12 @@ function runCommand(string $root): void
         return;
     }
 
+    $historyStartedAt = date(DATE_ATOM);
+    $historyCommand = 'unknown';
     try {
         $payload = json_decode(file_get_contents('php://input'), true, flags: JSON_THROW_ON_ERROR);
         $name = is_string($payload['command'] ?? null) ? $payload['command'] : '';
+        $historyCommand = $name;
         if (!isset(UI_COMMANDS[$name])) {
             throw new InvalidArgumentException('Unsupported command.');
         }
@@ -282,12 +354,31 @@ function runCommand(string $root): void
         fclose($pipes[2]);
         $exitCode = proc_close($process);
         emit(['type' => 'exit', 'code' => $exitCode]);
+        appendHistory($root, ['command' => $name, 'startedAt' => $historyStartedAt, 'finishedAt' => date(DATE_ATOM), 'duration' => max(0, time() - strtotime($historyStartedAt)), 'code' => $exitCode]);
         ftruncate($lock, 0);
         flock($lock, LOCK_UN);
         fclose($lock);
     } catch (Throwable $exception) {
         emit(['type' => 'error', 'message' => $exception->getMessage()]);
+        appendHistory($root, ['command' => $historyCommand, 'startedAt' => $historyStartedAt, 'finishedAt' => date(DATE_ATOM), 'duration' => max(0, time() - strtotime($historyStartedAt)), 'code' => 1]);
     }
+}
+
+function readHistory(string $root): array
+{
+    $path = $root . '/var/ui-history.json';
+    if (!is_file($path)) {
+        return [];
+    }
+    $history = json_decode((string) file_get_contents($path), true);
+    return is_array($history) ? $history : [];
+}
+
+function appendHistory(string $root, array $entry): void
+{
+    $history = readHistory($root);
+    array_unshift($history, $entry);
+    file_put_contents($root . '/var/ui-history.json', json_encode(array_slice($history, 0, 100), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
 }
 
 function getActiveJob(string $root): ?array

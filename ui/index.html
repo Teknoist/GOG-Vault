@@ -11,16 +11,21 @@
   <link rel="stylesheet" href="/destination.css">
   <link rel="stylesheet" href="/i18n.css">
   <link rel="stylesheet" href="/features.css">
+  <link rel="stylesheet" href="/advanced.css">
 </head>
 <body>
   <div class="grain"></div>
+  <button id="menuToggle" class="menu-toggle" aria-label="Menüyü aç">☰</button>
   <aside>
     <a class="brand" href="#"><span>G</span><strong>GOG Vault</strong></a>
     <nav>
-      <button class="active" data-view="library">Library</button>
+      <button class="active" data-view="overview">Overview</button>
+      <button data-view="library">Library</button>
       <button data-view="download">Download</button>
       <button data-view="backup">Cloud saves</button>
       <button data-view="integrity">Integrity</button>
+      <button data-view="activity"><span class="nav-label">Activity</span> <span id="activityBadge" class="nav-badge" hidden>1</span></button>
+      <button data-view="storage">Storage</button>
       <button data-view="settings">Settings</button>
       <button data-view="login">Account</button>
     </nav>
@@ -29,12 +34,18 @@
   <main>
     <header><div><p class="eyebrow">LOCAL COLLECTION</p><h1>Your games, safely archived.</h1></div><div class="header-actions"><select id="locale" aria-label="Language"><option value="en">English</option><option value="tr">Türkçe</option></select><button class="ghost" id="refreshBtn">↻ Sync library</button></div></header>
 
-    <section id="library" class="view active">
+    <section id="overview" class="view active">
       <div class="hero-card">
         <div><p class="eyebrow">QUICK START</p><h2>Bring your GOG library home.</h2><p>Sync your owned games, then create verified offline backups with resumable downloads.</p></div>
-        <button class="primary" data-go="download">Create a backup <span>→</span></button>
+        <button class="primary" id="syncBackupBtn"><span class="action-label">Sync & back up</span> <span>→</span></button>
       </div>
       <div class="stats" id="stats"><div><b id="statGames">0</b><span>Games</span></div><div><b id="statBacked">0</b><span>Backed up</span></div><div><b id="statSize">0 GB</b><span>Library size</span></div></div>
+      <div class="dashboard-grid"><div class="panel"><p class="eyebrow">ARCHIVE HEALTH</p><h2 id="healthTitle">Waiting for library</h2><div class="meter"><i id="healthMeter"></i></div><p id="healthText">Sync your library to calculate coverage.</p></div><div class="panel"><p class="eyebrow">RECENT ACTIVITY</p><div id="recentActivity" class="activity-list"><p>No activity yet.</p></div><button class="ghost" data-go="activity">Open activity</button></div></div>
+    </section>
+
+    <section id="library" class="view">
+      <div class="section-heading"><div><p class="eyebrow">GOG LIBRARY</p><h2>Your games</h2></div></div>
+      <div class="stats compact"><div><b id="libraryCount">0</b><span>Games</span></div><div><b id="missingCount">0</b><span>Not backed up</span></div><div><b id="selectedCountStat">0</b><span>Selected</span></div></div>
       <div class="toolbar"><input id="search" placeholder="Search local library…"><select id="statusFilter"><option value="all">All statuses</option><option value="backed">Backed up</option><option value="missing">Not backed up</option></select><select id="platformFilter"><option value="all">All platforms</option><option value="windows">Windows</option><option value="linux">Linux</option><option value="mac">macOS</option></select><select id="sortGames"><option value="title">Title A–Z</option><option value="size">Largest first</option><option value="status">Backup status</option></select><button id="listGames">Load games</button></div>
       <div id="games" class="games"><div class="empty"><b>◇</b><h3>Library not loaded yet</h3><p>Sign in, sync metadata, then load your games.</p></div></div>
       <div id="selectionBar" class="selection-bar"><strong><span id="selectionCount">0</span> games selected</strong><div><button id="clearSelection" class="ghost">Clear</button><button id="backupSelection" class="primary">Back up selected <span>→</span></button></div></div>
@@ -59,7 +70,11 @@
 
     <section id="integrity" class="view"><div class="panel"><p class="eyebrow">INTEGRITY & REPAIR</p><h2>Verify your local archive</h2><p>Checks existing installers against GOG checksums. Missing or damaged files are downloaded again; valid files are skipped.</p><div class="selected-summary active" id="integritySummary">Select games in the Library, or verify the whole archive.</div><div class="checks"><label><input type="checkbox" id="repairExtras"> <span>Include extras</span></label></div><button class="primary" id="verifyBtn">Verify & repair archive</button></div></section>
 
-    <section id="settings" class="view"><div class="panel"><p class="eyebrow">APPEARANCE</p><h2>Make GOG Vault yours</h2><label>Theme<select id="theme"><option value="vault">Vault Gold</option><option value="galaxy">Galaxy Purple</option><option value="midnight">Midnight Blue</option><option value="light">Paper Light</option></select></label><p>Your choice is stored only in this browser.</p></div></section>
+    <section id="activity" class="view"><div class="section-heading"><div><p class="eyebrow">DOWNLOAD MANAGER</p><h2>Activity & history</h2></div><button class="ghost" id="refreshActivity">Refresh</button></div><div id="activeQueue" class="panel queue-panel"><p>No active operation.</p></div><div class="panel wide-panel"><h3>History</h3><div id="activityHistory" class="activity-list"><p>No activity yet.</p></div></div></section>
+
+    <section id="storage" class="view"><div class="section-heading"><div><p class="eyebrow">STORAGE INSIGHTS</p><h2>Your local archive</h2></div><button class="ghost" id="refreshStorage">Refresh</button></div><div class="stats"><div><b id="storageUsed">0 GB</b><span>Archived size</span></div><div><b id="storageExpected">0 GB</b><span>Expected size</span></div><div><b id="storageFiles">0</b><span>Archived files</span></div></div><div class="panel wide-panel"><h3>Archive location</h3><code id="storagePath">—</code><div class="meter"><i id="storageMeter"></i></div><p id="storageCoverage">No storage data yet.</p></div></section>
+
+    <section id="settings" class="view"><div class="panel"><p class="eyebrow">APPEARANCE</p><h2>Make GOG Vault yours</h2><label>Theme<select id="theme"><option value="vault">Vault Gold</option><option value="galaxy">Galaxy Purple</option><option value="midnight">Midnight Blue</option><option value="light">Paper Light</option><option value="ember">Ember</option><option value="patina">Patina</option><option value="orchid">Orchid</option></select></label><label>Custom background<input id="backgroundInput" type="file" accept="image/*"></label><label>Background dim<input id="backgroundDim" type="range" min="0" max="90" value="45"></label><button class="ghost" id="clearBackground">Clear background</button><p>Your choice is stored only in this browser.</p></div></section>
 
     <section id="login" class="view"><div class="panel"><p class="eyebrow">ACCOUNT</p><h2>Connect securely with a login code</h2><ol><li>Open the GOG authorization page.</li><li>Sign in and copy the final blank-page URL.</li><li>Paste it below; it is sent only to this local app.</li></ol><a class="auth-link" target="_blank" rel="noreferrer" href="https://auth.gog.com/auth?client_id=46899977096215655&redirect_uri=https%3A%2F%2Fembed.gog.com%2Fon_login_success%3Forigin%3Dclient&response_type=code&layout=client2">Open GOG sign-in ↗</a><label>Redirect URL or code<input type="password" id="loginCode" autocomplete="off" placeholder="https://embed.gog.com/on_login_success?…"></label><button class="primary" id="loginBtn">Connect account</button></div></section>
   </main>
@@ -69,5 +84,6 @@
   <div id="toast" class="toast" role="status" aria-live="polite"><i></i><div><strong id="toastTitle"></strong><span id="toastMessage"></span></div></div>
   <script src="/i18n.js?v=20260715b"></script>
   <script src="/app.js?v=20260715b"></script>
+  <script src="/advanced.js?v=20260715a"></script>
 </body>
 </html>
