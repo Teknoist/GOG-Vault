@@ -12,7 +12,8 @@ const translations={tr:{
   'Connect securely with a login code':'Giriş koduyla güvenli bağlan','Open the GOG authorization page.':'GOG yetkilendirme sayfasını aç.',
   'Sign in and copy the final blank-page URL.':'Giriş yap ve son boş sayfanın adresini kopyala.','Paste it below; it is sent only to this local app.':'Aşağıya yapıştır; yalnızca bu yerel uygulamaya gönderilir.',
   'Open GOG sign-in ↗':'GOG girişini aç ↗','Redirect URL or code':'Yönlendirme adresi veya kod','Connect account':'Hesabı bağla',
-  'No library selection — all matching games will be downloaded.':'Kütüphaneden seçim yok — eşleşen tüm oyunlar indirilecek.','games selected':'oyun seçildi','SELECTED':'SEÇİLDİ','GOG LIBRARY':'GOG KÜTÜPHANESİ','Clear':'Temizle','Back up selected →':'Seçilenleri yedekle →'
+  'No library selection — all matching games will be downloaded.':'Kütüphaneden seçim yok — eşleşen tüm oyunlar indirilecek.','games selected':'oyun seçildi','SELECTED':'SEÇİLDİ','GOG LIBRARY':'GOG KÜTÜPHANESİ','Clear':'Temizle','Back up selected →':'Seçilenleri yedekle →',
+  'Integrity':'Bütünlük','Settings':'Ayarlar','Games':'Oyun','Backed up':'Yedeklendi','Library size':'Kütüphane boyutu','All statuses':'Tüm durumlar','Not backed up':'Yedeklenmedi','All platforms':'Tüm platformlar','Title A–Z':'Ada göre A–Z','Largest first':'Önce en büyük','Backup status':'Yedek durumu','BACKED UP':'YEDEKLENDİ','NOT BACKED UP':'YEDEKLENMEDİ','GAME DETAILS':'OYUN AYRINTILARI','INTEGRITY & REPAIR':'BÜTÜNLÜK VE ONARIM','Verify your local archive':'Yerel arşivini doğrula','Verify & repair archive':'Arşivi doğrula ve onar','APPEARANCE':'GÖRÜNÜM','Make GOG Vault yours':'GOG Vault görünümünü özelleştir','Theme':'Tema'
 }};
 window.t=text=>(translations[localStorage.getItem('gog-vault-locale')||'en']||{})[text]||text;
 const originalText=new WeakMap();
