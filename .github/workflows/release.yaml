@@ -1,6 +1,9 @@
 name: Create Release
 concurrency: release
 
+permissions:
+  contents: write
+
 on:
   push:
     tags:
