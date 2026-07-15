@@ -5,9 +5,13 @@
 
 [Türkçe](#türkçe) · [English](#english) · [Upstream CLI documentation](#gog-downloader-cli)
 
-![GOG Vault game library](docs/screenshots/library-tr.png)
+## Ekran görüntüleri
 
-![Selecting games for backup](docs/screenshots/selection-tr.png)
+| Türkçe oyun kütüphanesi | Oyun ayrıntıları ve dosyalar |
+| --- | --- |
+| ![Türkçe GOG Vault oyun kütüphanesi](docs/screenshots/library-tr.png) | ![Türkçe oyun ayrıntıları](docs/screenshots/game-detail-tr.png) |
+| **Çoklu seçim ve yedekleme** | **Bütünlük doğrulama ve onarım** |
+| ![Oyun seçimi ve yedekleme](docs/screenshots/selection-tr.png) | ![Bütünlük doğrulama ve onarım](docs/screenshots/integrity-tr.png) |
 
 ## Türkçe
 
