@@ -11,10 +11,10 @@
   #define MyAppVersion "dev-version"
 #endif
 
-#define MyAppName "GOG Downloader"
-#define MyAppPublisher "RikudouSage"
-#define MyAppURL "https://github.com/RikudouSage/GogDownloader"
-#define MyAppExeName "GogDownloader.exe"
+#define MyAppName "GOG Vault"
+#define MyAppPublisher "Teknoist; based on RikudouSage/GogDownloader"
+#define MyAppURL "https://github.com/Teknoist/GOG-Vault"
+#define MyAppExeName "GOG Vault.vbs"
 #define PhpLink "https://windows.php.net/downloads/releases/php-8.4.4-nts-Win32-vs17-x64.zip"
 #define PhpLinkFallback "https://files.catbox.moe/2jonqa.zip"
 #define PhpLinkFallback2 "https://download.rikudou.dev/php-8.4.4-nts-Win32-vs17-x64.zip"
@@ -39,7 +39,7 @@ AllowNoIcons=yes
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=.
-OutputBaseFilename=GogDownloaderSetup
+OutputBaseFilename=GOGVaultSetup
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -47,23 +47,32 @@ WizardStyle=modern
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "czech"; MessagesFile: "compiler:Languages\Czech.isl"
+Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
 
 [Files]
 Source: ".\bin\*"; DestDir: "{app}\php-bin"; Flags: ignoreversion recursesubdirs
 Source: ".\config\*"; DestDir: "{app}\config"; Flags: ignoreversion recursesubdirs
 Source: ".\src\*"; DestDir: "{app}\src"; Flags: ignoreversion recursesubdirs
+Source: ".\ui\*"; DestDir: "{app}\ui"; Flags: ignoreversion recursesubdirs
 Source: ".\vendor\*"; DestDir: "{app}\vendor"; Flags: ignoreversion recursesubdirs
 Source: ".\composer.json"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\composer.lock"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\windows\unzip.exe"; DestDir: "{tmp}"; Flags: ignoreversion
 Source: ".\windows\gog-downloader.bat"; DestDir: "{app}\bin"; Flags: ignoreversion
+Source: ".\windows\gog-vault.vbs"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
+Name: "{group}\GOG Vault"; Filename: "{sys}\wscript.exe"; Parameters: """{app}\gog-vault.vbs"""; WorkingDir: "{app}"
+Name: "{autodesktop}\GOG Vault"; Filename: "{sys}\wscript.exe"; Parameters: """{app}\gog-vault.vbs"""; WorkingDir: "{app}"; Tasks: desktopicon
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
+
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Run]
 Filename: "{tmp}\VC_redist.x64.exe"; StatusMsg: "{cm:InstallingVC2017redist}"; Parameters: "/quiet"; Check: VS17RedistNeedsInstall; Flags: waituntilterminated
-Filename: "cmd.exe"; Description: "{cm:OpenCmd}"; Parameters: "/K ""cd %USERPROFILE% && set ""Path=%Path%;{app}\bin"" && echo Run the gog-downloader command to view usage instructions or to start using it. Note that if you get an error about the command not being recognized, you might need to reboot your PC."""; Flags: nowait postinstall skipifsilent
+Filename: "{sys}\wscript.exe"; Description: "Launch GOG Vault"; Parameters: """{app}\gog-vault.vbs"""; Flags: nowait postinstall skipifsilent
 
 [CustomMessages]
 english.DownloadPhpPageTitle=Downloading runtime
@@ -77,6 +86,18 @@ english.CopyFileFailed=Copying one of the required files failed. Please try agai
 english.InstallingVC2017redist=Installing VC Redist...
 english.OpenCmd=Open a new command line window
 english.FinishText=GOG Downloader has been installed and can now be used from any command line or PowerShell window, by invoking the gog-downloader command.
+
+turkish.DownloadPhpPageTitle=Çalışma ortamı indiriliyor
+turkish.DownloadPhpPageDescription=Kurulum desteklenen PHP çalışma ortamını indiriyor, lütfen bekleyin.
+turkish.DownloadPhpFailed=PHP çalışma ortamı indirilemedi. İnternet bağlantınızı kontrol edip yeniden deneyin.
+turkish.DownloadPhpExtracting=PHP çalışma ortamı ayıklanıyor, lütfen bekleyin.
+turkish.ExtractPhpFailed=PHP çalışma ortamı ayıklanamadı.
+turkish.CopyingPhp=PHP çalışma ortamı uygulama klasörüne kopyalanıyor.
+turkish.DownloadFinished=PHP çalışma ortamı başarıyla hazırlandı.
+turkish.CopyFileFailed=Gerekli dosyalardan biri kopyalanamadı. Lütfen yeniden deneyin.
+turkish.InstallingVC2017redist=Visual C++ çalışma ortamı kuruluyor...
+turkish.OpenCmd=Yeni bir komut satırı penceresi aç
+turkish.FinishText=GOG Vault kuruldu. Masaüstü veya Başlat menüsü kısayolundan tek tıkla açabilirsiniz.
 
 czech.DownloadPhpPageTitle=Stahování rozhraní
 czech.DownloadPhpPageDescription=Instalátor nyní stahuje nejnovější podporované php rozhraní, prosím čekejte.
@@ -280,7 +301,7 @@ begin
   
   if not Exec(TmpDir + '\unzip.exe', TmpDir + '\php.zip -d php', TmpDir, SW_HIDE, ewWaitUntilTerminated, ResultCode) then
   begin
-    MsgBox(ExpandConstant('{cm:ExtractPhpFailed'), mbError, MB_OK);
+    MsgBox(ExpandConstant('{cm:ExtractPhpFailed}'), mbError, MB_OK);
     ExitProcess(1);
   end;
   
@@ -331,6 +352,11 @@ begin
     ExitProcess(1);
   end;
   if StringChangeEx(PhpIniContent, ';extension=curl', 'extension=curl', True) <= 0 then
+  begin
+    MsgBox(ExpandConstant('{cm:CopyFileFailed}'), mbError, MB_OK);
+    ExitProcess(1);
+  end;
+  if StringChangeEx(PhpIniContent, ';extension=pdo_sqlite', 'extension=pdo_sqlite', True) <= 0 then
   begin
     MsgBox(ExpandConstant('{cm:CopyFileFailed}'), mbError, MB_OK);
     ExitProcess(1);

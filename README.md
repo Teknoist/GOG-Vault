@@ -1,4 +1,66 @@
-# gog-downloader
+# GOG Vault
+
+> A modern, visual and local-first backup manager for your GOG library.
+> GOG kütüphaneniz için modern, görsel ve yerel çalışan yedekleme yöneticisi.
+
+[Türkçe](#türkçe) · [English](#english) · [Upstream CLI documentation](#gog-downloader-cli)
+
+![GOG Vault game library](docs/screenshots/library-tr.png)
+
+![Selecting games for backup](docs/screenshots/selection-tr.png)
+
+## Türkçe
+
+GOG Vault; oyunlarınızı kapak görselleriyle listeler, tekli veya çoklu seçimle doğrulanmış çevrimdışı yedekler oluşturur ve yarım kalan indirmelere devam eder. Arayüz yalnızca bilgisayarınızda `127.0.0.1` üzerinde çalışır; GOG parolanız uygulamaya verilmez.
+
+### Windows — tek tık kurulum
+
+1. Releases sayfasından **`GOGVaultSetup.exe`** dosyasını indirin.
+2. Kurulumu tamamlayıp masaüstündeki **GOG Vault** kısayoluna çift tıklayın.
+3. Uygulama tarayıcınızda otomatik açılır.
+4. Varsayılan yedek klasörü: `%USERPROFILE%\Downloads\GOG Vault`
+5. Ayarlar ve oturum verisi: `%APPDATA%\GOG Vault`
+
+### Özellikler
+
+- Türkçe ve İngilizce arayüz
+- GOG kapak/banner görselleri ve yerel önbellek
+- Tekli/çoklu oyun seçimi
+- Doğrulanan, devam ettirilebilir indirmeler
+- DLC, ekstralar ve bulut kayıtları
+- Sayfa yenilense bile devam eden arka plan görevleri
+- Windows tek tık kurulum, Docker ve PHP seçenekleri
+
+## English
+
+GOG Vault presents your owned games as a visual library, lets you select one or many titles, and creates verified resumable offline backups. The interface binds to `127.0.0.1` only; your GOG password is never given to the application.
+
+### Windows — one-click setup
+
+1. Download **`GOGVaultSetup.exe`** from Releases.
+2. Complete setup and double-click the **GOG Vault** desktop shortcut.
+3. The app opens automatically in your browser.
+4. Default backup directory: `%USERPROFILE%\Downloads\GOG Vault`
+5. Settings and session data: `%APPDATA%\GOG Vault`
+
+### Development
+
+```shell
+composer install
+composer ui
+```
+
+Open `http://127.0.0.1:8787`. Use another port with `php bin/ui.php --port=9000`.
+
+## Credits and license
+
+GOG Vault is a fork of [RikudouSage/GogDownloader](https://github.com/RikudouSage/GogDownloader), originally created by **Dominik Chrástecký (RikudouSage)**. The downloader engine, authentication, metadata, verification, resume, cloud-save and storage foundations come from that project.
+
+Released under the MIT License. The original copyright and license notice are preserved in [LICENSE](LICENSE).
+
+---
+
+## gog-downloader CLI
 
 PHP based tool to download the games you have bought on GOG to your hard drive.
 

@@ -1,0 +1,6 @@
+.toast{position:fixed;top:22px;right:22px;z-index:20;display:flex;align-items:center;gap:12px;min-width:310px;max-width:430px;padding:15px 18px;background:#202019;border:1px solid #464238;border-radius:10px;box-shadow:0 18px 55px #000;opacity:0;transform:translateY(-15px);pointer-events:none;transition:.25s}
+.toast.show{opacity:1;transform:none}
+.toast i{width:10px;height:10px;border-radius:50%;background:#72cb8b;box-shadow:0 0 12px #72cb8b}
+.toast.error i{background:#ef6c68;box-shadow:0 0 12px #ef6c68}
+.toast div{display:grid}
+.toast span{color:var(--muted);font-size:13px}
