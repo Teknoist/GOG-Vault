@@ -38,14 +38,19 @@ GOG Vault; oyunlarınızı kapak görselleriyle listeler, tekli veya çoklu seç
 - Installer, patch ve ekstraları gösteren ayrıntılı oyun penceresi
 - Eksik veya bozuk dosyaları yeniden indiren bütünlük doğrulama ve onarım
 - Yenilemeden sonra geri gelen işlem günlüğü ve aktif işlemi durdurma
-- Dört farklı arayüz teması
+- Genel Bakış ekranı ve tek tık **Eşitle ve yedekle** akışı
+- Kalıcı işlem geçmişi, aktif indirme yöneticisi ve işlem rozeti
+- Arşiv boyutu, dosya sayısı ve kapsama oranını gösteren depolama analizi
+- Oyun ayrıntısından yedekle, doğrula/onar, yeniden indir ve arşivden dışarı aktar
+- Yedi arayüz teması, özel arka plan ve karartma ayarı
+- Mobil/tablet uyumlu çekmece menüsü ve paylaşılabilir ekran bağlantıları
 - Windows tek tık kurulum, Docker ve PHP seçenekleri
 
 ## English
 
 GOG Vault presents your owned games as a visual library, lets you select one or many titles, and creates verified resumable offline backups. The interface binds to `127.0.0.1` only; your GOG password is never given to the application.
 
-It also includes backup-status badges, size and file statistics, platform/status filters, sorting, detailed installer/patch/extra views, integrity repair, persistent activity logs, cancellation, local artwork caching and four themes.
+It also includes backup-status badges, size and file statistics, platform/status filters, sorting, detailed installer/patch/extra views, integrity repair, persistent activity history and an active download manager, storage insights, secure archive export, local artwork caching, seven themes, custom backgrounds, responsive navigation and deep links.
 
 ### Windows — one-click setup
 
