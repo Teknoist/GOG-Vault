@@ -28,6 +28,7 @@
         }
     },
     "scripts": {
+        "ui": "php bin/ui.php",
         "fixer": "php-cs-fixer fix --verbose --allow-risky=yes",
         "pre-autoload-dump": "Aws\\Script\\Composer\\Composer::removeUnusedServices"
     },

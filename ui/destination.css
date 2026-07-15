@@ -1,0 +1,3 @@
+.destination-hint{display:grid;gap:3px;padding:13px 15px;margin:0 0 8px;border:1px solid #52462f;border-radius:8px;background:#211d15;color:var(--muted)}
+.destination-hint span{font-size:10px;letter-spacing:.16em;color:var(--gold);font-weight:800}
+.destination-hint strong{color:var(--ink);font:18px Georgia,serif}.destination-hint small{font-size:12px}
